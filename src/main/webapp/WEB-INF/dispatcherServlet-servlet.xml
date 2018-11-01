@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="com.study.shop.web.controller"/>
+
+    <mvc:annotation-driven/>
+<!--
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/" />
+            <mvc:mapping path="/products" />
+            <bean class="com.study.shop.web.controller.UserAuthInterceptor" />
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/product/edit/*" />
+            <mvc:mapping path="/product/delete/*" />
+            <bean class="com.study.shop.web.controller.AdminAuthInterceptor" />
+        </mvc:interceptor>
+    </mvc:interceptors>
+-->
+
+    <!-- SERVICES -->
+    <bean id="productService" class="com.study.shop.service.DefaultProductService">
+        <property name="productDao" ref="productDao"/>
+    </bean>
+
+    <bean id="productDao" class="com.study.shop.dao.jdbc.JdbcProductDao">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="userDao" class="com.study.shop.dao.jdbc.JdbcUserDao">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean class="java.net.URI" id="dbUrl">
+        <constructor-arg value="#{systemEnvironment['DATABASE_URL']==null?'postrges://app_owner:app_owner@127.0.0.1:5432/app_owner':systemEnvironment['DATABASE_URL']}"/>
+    </bean>
+
+    <bean id="dataSource" class="org.postgresql.ds.PGSimpleDataSource">
+        <property name="serverName" value="#{@dbUrl.getHost()}"/>
+        <property name="databaseName" value="#{@dbUrl.getPath().substring(1)}"/>
+        <property name="portNumber" value="#{@dbUrl.getPort()}"/>
+        <property name="user" value="#{@dbUrl.getUserInfo().split(':')[0]}"/>
+        <property name="password" value="#{@dbUrl.getUserInfo().split(':')[1]}"/>
+    </bean>
+
+    <!--
+    <bean id="dataSource" class="org.postgresql.ds.PGSimpleDataSource">
+        <property name="serverName" value="localhost"/>
+        <property name="databaseName" value="app_owner"/>
+        <property name="portNumber" value="5432"/>
+        <property name="user" value="app_owner"/>
+        <property name="password" value="app_owner"/>
+    </bean>
+    -->
+
+    <!--
+    <bean id="dataSource" class="org.postgresql.ds.PGSimpleDataSource">
+        <property name="serverName" value="ec2-79-125-8-105.eu-west-1.compute.amazonaws.com"/>
+        <property name="databaseName" value="d6u2jrhlcua09"/>
+        <property name="portNumber" value="5432"/>
+        <property name="user" value="xthiriiuitselo"/>
+        <property name="password" value="4e6d65e9914255dc1f2b0f32102e444bc98e047fc304c74fdbdb8f8fd147f918"/>
+    </bean>
+    -->
+
+    <bean id="defaultUserService" class="com.study.shop.service.DefaultUserService">
+        <property name="userDao" ref="userDao"/>
+    </bean>
+
+    <bean id="securityService" class="com.study.shop.security.SecurityService">
+        <property name="defaultUserService" ref="defaultUserService" />
+    </bean>
+
+    <bean id="beanUtils" class="com.study.shop.util.BeanUtil"/>
+
+    <bean id="springTemplateResolver"
+          class="org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver">
+        <property name="prefix" value="/WEB-INF/classes/" />
+        <property name="suffix" value=".html" />
+        <property name="templateMode" value="HTML5"/>
+    </bean>
+
+    <bean id="springTemplateEngine"
+          class="org.thymeleaf.spring5.SpringTemplateEngine">
+        <property name="templateResolver" ref="springTemplateResolver" />
+    </bean>
+
+    <bean class="org.thymeleaf.spring5.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="springTemplateEngine" />
+        <property name="characterEncoding" value="UTF-8"/>
+    </bean>
+</beans>
