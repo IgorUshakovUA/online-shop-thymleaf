@@ -3,16 +3,19 @@ package com.study.shop.web.filter;
 import com.study.shop.entity.User;
 import com.study.shop.security.SecurityService;
 import com.study.shop.security.entity.Session;
-import com.study.shop.util.BeanUtil;
 import com.study.shop.util.CookieUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-
-public abstract class AbstractSecurityFilter implements Filter {
+@Configurable
+public class AbstractSecurityFilter implements Filter {
+    @Autowired
     private SecurityService securityService;
 
     @Override
@@ -20,9 +23,6 @@ public abstract class AbstractSecurityFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         boolean isAuth = false;
-
-        securityService = BeanUtil.getBean(SecurityService.class);
-
 
         String userToken = CookieUtil.getCookieValue("user-session", httpServletRequest);
         if (userToken != null) {
@@ -48,7 +48,7 @@ public abstract class AbstractSecurityFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-
+        securityService = WebApplicationContextUtils.getRequiredWebApplicationContext(filterConfig.getServletContext()).getBean(SecurityService.class);
     }
 
     @Override
