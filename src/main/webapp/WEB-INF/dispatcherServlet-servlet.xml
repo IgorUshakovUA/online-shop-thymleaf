@@ -29,8 +29,6 @@
         </mvc:interceptors>
     -->
 
-    <bean id="beanUtils" class="com.study.shop.util.BeanUtil"/>
-
     <bean id="springTemplateResolver"
           class="org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver">
         <property name="prefix" value="/WEB-INF/classes/"/>

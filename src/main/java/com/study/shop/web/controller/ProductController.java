@@ -44,20 +44,6 @@ public class ProductController {
         return "products";
     }
 
-    @ResponseBody
-    @RequestMapping(path = {"/assets/*","/assets/img/*","/assets/css/*"}, method = RequestMethod.GET)
-    public byte[] getAssets(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String requestURI = req.getRequestURI();
-
-        ServletOutputStream outputStream = resp.getOutputStream();
-        InputStream inputStream = ResourceUtil.getResourceAsStream(requestURI.substring(1));
-
-        byte[] result = new byte[inputStream.available()];
-        inputStream.read(result);
-
-        return result;
-    }
-
     @RequestMapping(path = "/product/add", method = RequestMethod.GET)
     public String addProductPage() {
         return "addProduct";
@@ -103,78 +89,5 @@ public class ProductController {
         productService.delete(id);
 
         return "redirect:/products";
-    }
-
-    @RequestMapping(path="/cart", method = RequestMethod.GET)
-    public String getCart(HttpServletRequest req, HttpServletResponse resp, Model model) {
-        String userToken = CookieUtil.getCookieValue("user-session", req);
-        Session session = securityService.getSession(userToken);
-
-        List<CartProduct> products = productService.getByCart(session.getCart());
-        for (CartProduct cartProduct : products) {
-            cartProduct.setCount(session.getCart().getCountById(cartProduct.getProduct().getId()));
-        }
-
-        model.addAttribute("products", products);
-
-        return "cart";
-    }
-
-
-    @RequestMapping(path="/login", method=RequestMethod.GET)
-    public String getLoginPage() {
-        return "login";
-    }
-
-    @RequestMapping(path="/login",method = RequestMethod.POST)
-    public String login(@RequestParam String name, @RequestParam String password, HttpServletResponse resp) {
-        Session session = securityService.auth(name, password);
-
-        if (session != null) {
-            CookieUtil.setCookie("user-session", session.getToken(),resp);
-            return "redirect:/";
-        } else {
-            return "redirect:/login";
-        }
-    }
-
-    @RequestMapping(path="/cart/add/{id}", method=RequestMethod.GET)
-    public String addToCart(@PathVariable int id, HttpServletRequest req) {
-        String userToken = CookieUtil.getCookieValue("user-session", req);
-        Session session = securityService.getSession(userToken);
-
-        session.getCart().addProduct(id,1);
-
-        return "redirect:/products";
-    }
-
-    @RequestMapping(path="/cart/delete/{id}", method = RequestMethod.GET)
-    public String deleteFromCart(@PathVariable int id, HttpServletRequest req) {
-        String userToken = CookieUtil.getCookieValue("user-session", req);
-        Session session = securityService.getSession(userToken);
-
-        session.getCart().deleteProduct(id);
-
-        return "redirect:/cart";
-    }
-
-    @RequestMapping(path="/cart/plus/{id}", method = RequestMethod.GET)
-    public String plusOneFromCart(@PathVariable int id, HttpServletRequest req) {
-        String userToken = CookieUtil.getCookieValue("user-session", req);
-        Session session = securityService.getSession(userToken);
-
-        session.getCart().addProduct(id,1);
-
-        return "redirect:/cart";
-    }
-
-    @RequestMapping(path="/cart/minus/{id}", method = RequestMethod.GET)
-    public String minusOneFromCart(@PathVariable int id, HttpServletRequest req) {
-        String userToken = CookieUtil.getCookieValue("user-session", req);
-        Session session = securityService.getSession(userToken);
-
-        session.getCart().decreaseCount(id);
-
-        return "redirect:/cart";
     }
 }
