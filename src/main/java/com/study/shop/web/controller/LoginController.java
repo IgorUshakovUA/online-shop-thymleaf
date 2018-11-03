@@ -2,8 +2,9 @@ package com.study.shop.web.controller;
 
 import com.study.shop.security.SecurityService;
 import com.study.shop.security.entity.Session;
-import com.study.shop.service.ProductService;
 import com.study.shop.util.CookieUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,8 @@ import javax.servlet.http.HttpServletResponse;
 
 @Controller
 public class LoginController {
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
+
     @Autowired
     private SecurityService securityService;
 
